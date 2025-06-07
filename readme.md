@@ -42,7 +42,6 @@ BlogPython/
 1. Clone o repositório:
 
 git clone https://github.com/marcoantoniolobo82/BlogPython.git
-cd BlogPython
 
 2. Crie um arquivo .env baseado no .env.example com suas credenciais:
 
