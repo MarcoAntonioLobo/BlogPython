@@ -2,6 +2,7 @@
 services:
   web:
     build: .
+    image: marcoantoniolobo82/blog-python:v1.0
     ports:
       - "8080:8080"
     volumes:
@@ -24,4 +25,5 @@ services:
 
 volumes:
   pgdata:
+
 
