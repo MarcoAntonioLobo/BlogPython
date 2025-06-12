@@ -11,12 +11,12 @@ app = Flask(__name__)
 
 def get_db_connection():
     conn = psycopg2.connect(
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT")
-    )
+    dbname=os.getenv("POSTGRES_DB"),
+    user=os.getenv("POSTGRES_USER"),
+    password=os.getenv("POSTGRES_PASSWORD"),
+    host=os.getenv("DB_HOST", "db"),   # "db" é o nome do serviço no docker-compose
+    port=os.getenv("POSTGRES_PORT")
+)
     return conn
 
 def create_database_and_table():

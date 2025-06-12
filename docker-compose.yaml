@@ -1,29 +1,34 @@
-
 services:
   web:
-    build: .
-    image: marcoantoniolobo82/blog-python:v1.0
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    image: ${IMAGE_TAG}
     ports:
-      - "8080:8080"
+      - "${APP_PORT}:${APP_PORT}"
     volumes:
-      - .:/app
+      - ./app:/app
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - .env
 
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: blogdb
-      POSTGRES_USER: malobo
-      POSTGRES_PASSWORD: 233234
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:
-
-
