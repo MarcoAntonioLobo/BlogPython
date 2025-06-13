@@ -1,13 +1,46 @@
-# Ignorar arquivos de ambiente
-.env
+# Ambiente virtual
+venv/
+.venv/
+ENV/
+env/
+Env/
 
-# Ignorar arquivos Python compilados
+# Arquivos Python compilados
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
 
-# Ignorar arquivos de editor
+# Arquivos de logs e cache
+*.log
+*.sqlite3
+*.db
+*.pyc
+*.egg-info/
+*.egg
+
+# Arquivos de configuração de editor
 .vscode/
 .idea/
 
-# Ignorar arquivos do sistema
+# Configs específicas do sistema
 .DS_Store
+Thumbs.db
+
+# Arquivos do pip
+pip-wheel-metadata/
+*.whl
+
+# Arquivos de testes
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Docker (se você estiver usando)
+*.env
+.env.*
+docker-compose.override.yml
