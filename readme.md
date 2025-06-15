@@ -16,20 +16,22 @@ Projeto simples de blog feito em Flask com banco PostgreSQL, todo rodando em con
 
 ## Estrutura do Projeto
 
-´´´
 BlogPython/
 │
-├── app.py # Código principal da aplicação Flask
-├── Dockerfile # Imagem Docker da aplicação
-├── docker-compose.yml # Orquestração dos containers (app + banco)
-├── requirements.txt # Dependências Python
-├── .env.example # Exemplo de arquivo de variáveis de ambiente
-├── .gitignore # Arquivos ignorados pelo Git
-├── README.md # Documentação do projeto
-└── templates/ # Templates HTML (layout e index)
-├── layout.html
-└── index.html
-´´´
+├── app.py                 # Código principal da aplicação Flask
+├── Dockerfile             # Imagem Docker da aplicação
+├── docker-compose.yml     # Orquestração dos containers (app + banco)
+├── requirements.txt       # Dependências Python
+├── .env.example           # Exemplo de arquivo de variáveis de ambiente
+├── .gitignore             # Arquivos ignorados pelo Git
+├── README.md              # Documentação do projeto
+├── templates/             # Templates HTML (layout e index)
+│   ├── layout.html
+│   └── index.html
+└── static/                # Arquivos estáticos (CSS, imagens, JS)
+    └── style.css
+
+---
 
 ## Como Rodar Localmente
 
