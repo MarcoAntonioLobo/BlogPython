@@ -16,6 +16,8 @@ Projeto simples de blog feito em Flask com banco PostgreSQL, todo rodando em con
 
 ## Estrutura do Projeto
 
+```plaintext
+
 BlogPython/
 │
 ├── app.py                 # Código principal da aplicação Flask
@@ -31,7 +33,7 @@ BlogPython/
 └── static/                # Arquivos estáticos (CSS, imagens, JS)
     └── style.css
 
----
+```
 
 ## Como Rodar Localmente
 
