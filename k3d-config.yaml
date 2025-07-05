@@ -1,0 +1,10 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: meucluster
+servers: 1
+agents: 9
+ports:
+  - port: "30000:30000" # NodePort exposto no host
+    nodeFilters:
+      - server:0
