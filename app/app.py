@@ -11,12 +11,12 @@ app = Flask(__name__)
 
 def get_db_connection():
     conn = psycopg2.connect(
-    dbname=os.getenv("POSTGRES_DB"),
-    user=os.getenv("POSTGRES_USER"),
-    password=os.getenv("POSTGRES_PASSWORD"),
-    host=os.getenv("DB_HOST", "db"),   # "db" é o nome do serviço no docker-compose
-    port=os.getenv("POSTGRES_PORT")
-)
+        dbname=os.getenv("POSTGRES_DB"),
+        user=os.getenv("POSTGRES_USER"),
+        password=os.getenv("POSTGRES_PASSWORD"),
+        host=os.getenv("DB_HOST", "db"),
+        port=os.getenv("POSTGRES_PORT")
+    )
     return conn
 
 def create_database_and_table():
@@ -36,7 +36,7 @@ def create_database_and_table():
             conn.close()
             print("Tabela 'posts' criada ou já existe.")
             break
-        except psycopg2.OperationalError as e:
+        except psycopg2.OperationalError:
             print("Banco ainda não está pronto. Aguardando 2 segundos...")
             time.sleep(2)
         except Exception as e:
@@ -64,6 +64,10 @@ def add_post():
     conn.commit()
     conn.close()
     return redirect('/')
+
+@app.route('/health')
+def health():
+    return "OK", 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
