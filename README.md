@@ -25,6 +25,8 @@ BlogPython/
 ├── k8s/
 │   ├── deployment-dev.yaml    # Manifest para ambiente de desenvolvimento (com probes configurados)
 │   ├── deployment-prod.yaml   # Manifest para ambiente de produção (com probes configurados)
+│   ├── quota-dev.yaml         # ResourceQuota para ambiente dev
+│   ├── quota-prod.yaml        # ResourceQuota para ambiente prod
 │   ├── kind-config.yaml       # Configuração do cluster Kind
 │   └── k3d-config.yaml        # Configuração do cluster K3d
 ├── requirements.txt           # Dependências Python
@@ -90,11 +92,34 @@ Ou para aplicar o ambiente de produção (também com probes configurados):
 ```bash
 kubectl apply -f k8s/deployment-prod.yaml
 ```
+Ou Aplique a ResourceQuota para limitar recursos por namespace:
+
+Para ambiente de desenvolvimento:
+
+```bash
+kubectl apply -f k8s/quota-dev.yaml -n dev
+```
+Para ambiente de produção:
+
+```bash
+kubectl apply -f k8s/quota-prod.yaml -n prod
+```
+Aplique o ambiente de desenvolvimento (contém probes configurados e quotas aplicadas):
+
+```bash
+kubectl apply -f k8s/deployment-dev.yaml -n dev
+```
+Ou para o ambiente de produção:
+
+```bash
+kubectl apply -f k8s/deployment-prod.yaml -n prod
+```
 
 5. Verifique os pods, serviços e volumes:
 
 ```bash
-kubectl get pods,svc,pvc
+kubectl get pods,svc,pvc -n dev
+kubectl get pods,svc,pvc -n prod
 ```
 
 6. Acesse a aplicação:
@@ -108,7 +133,8 @@ http://localhost:30000
 ## Como Funciona a Arquitetura
 
 - Os arquivos `deployment-dev.yaml` e `deployment-prod.yaml` contêm **ConfigMap**, **Secret**, **Deployments** e **Services** adequados para cada ambiente.  
-- Nos Deployments `web`, estão configurados os **liveness probe**, **readiness probe** e **startup probe** para monitorar a saúde e disponibilidade da aplicação Flask.  
+- Nos Deployments `web`, estão configurados os **liveness probe**, **readiness probe** e **startup probe** para monitorar a saúde e disponibilidade da aplicação Flask.
+- **ResourceQuota** nos namespaces `dev` e `prod` para garantir limites de CPU, memória e pods, evitando sobrecarga do cluster.  
 - **Service db**: container PostgreSQL com PersistentVolumeClaim para persistência dos dados.  
 - **Service web**: container Flask que depende do db, conecta via variáveis de ambiente do ConfigMap e Secret.  
 - Rede interna Kubernetes facilita comunicação entre os containers pelo hostname `db`.  
@@ -143,6 +169,7 @@ Gerenciadas via ConfigMap e Secret definidos nos manifests:
 - Variáveis de ambiente gerenciadas via ConfigMap e Secret no mesmo arquivo  
 - Containerização com Docker e orquestração com Kubernetes  
 - **Liveness probe, readiness probe e startup probe configurados** para garantir resiliência da aplicação  
+- ResourceQuota para controlar uso de recursos no cluster e evitar consumo excessivo
 
 ---
 
