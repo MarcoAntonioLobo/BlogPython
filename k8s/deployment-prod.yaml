@@ -1,7 +1,9 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: app-config
+  namespace: prod
 data:
   APP_PORT: "8080"
   APP_ENV: "production"
@@ -10,6 +12,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: db-secret
+  namespace: prod
 type: Opaque
 stringData:
   POSTGRES_DB: "blogdb"
@@ -20,6 +23,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: db
+  namespace: prod
 spec:
   replicas: 1
   selector:
@@ -51,6 +55,13 @@ spec:
             secretKeyRef:
               name: db-secret
               key: POSTGRES_PASSWORD
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
         volumeMounts:
         - mountPath: /var/lib/postgresql/data
           name: pgdata
@@ -73,6 +84,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: pgdata-pvc
+  namespace: prod
 spec:
   accessModes:
     - ReadWriteOnce
@@ -84,6 +96,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: web
+  namespace: prod
 spec:
   replicas: 5
   selector:
@@ -135,6 +148,13 @@ spec:
           value: "malobo"
         - name: DB_PASSWORD
           value: "233234"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "300m"
+          limits:
+            memory: "1Gi"
+            cpu: "600m"
         startupProbe:
           httpGet:
             path: /health
@@ -162,6 +182,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: db
+  namespace: prod
 spec:
   selector:
     app: db
@@ -173,6 +194,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: web
+  namespace: prod
 spec:
   selector:
     app: web
