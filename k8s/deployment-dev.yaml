@@ -1,4 +1,4 @@
----
+# ConfigMap para o app
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,6 +8,7 @@ data:
   APP_PORT: "8080"
   APP_ENV: "development"
 ---
+# Secret para o banco
 apiVersion: v1
 kind: Secret
 metadata:
@@ -19,6 +20,20 @@ stringData:
   POSTGRES_USER: "malobo"
   POSTGRES_PASSWORD: "233234"
 ---
+# PVC para PostgreSQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgdata-pvc
+  namespace: dev
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Deployment do banco PostgreSQL
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -80,18 +95,7 @@ spec:
           persistentVolumeClaim:
             claimName: pgdata-pvc
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: pgdata-pvc
-  namespace: dev
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
+# Deployment da aplicação Flask
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -178,6 +182,7 @@ spec:
             failureThreshold: 2
             timeoutSeconds: 2
 ---
+# Service para o banco
 apiVersion: v1
 kind: Service
 metadata:
@@ -190,6 +195,7 @@ spec:
     - port: 5432
       targetPort: 5432
 ---
+# Service para a aplicação web
 apiVersion: v1
 kind: Service
 metadata:

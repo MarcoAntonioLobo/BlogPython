@@ -1,4 +1,4 @@
----
+# ConfigMap da aplicação
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,6 +8,7 @@ data:
   APP_PORT: "8080"
   APP_ENV: "production"
 ---
+# Secret do banco
 apiVersion: v1
 kind: Secret
 metadata:
@@ -19,6 +20,20 @@ stringData:
   POSTGRES_USER: "malobo"
   POSTGRES_PASSWORD: "233234"
 ---
+# PersistentVolumeClaim do PostgreSQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgdata-pvc
+  namespace: prod
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Deployment do banco PostgreSQL
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,63 +50,52 @@ spec:
         app: db
     spec:
       containers:
-      - name: postgres
-        image: postgres:15
-        ports:
-        - containerPort: 5432
-        env:
-        - name: POSTGRES_DB
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: POSTGRES_DB
-        - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: POSTGRES_USER
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: POSTGRES_PASSWORD
-        resources:
-          requests:
-            memory: "1Gi"
-            cpu: "500m"
-          limits:
-            memory: "2Gi"
-            cpu: "1"
-        volumeMounts:
-        - mountPath: /var/lib/postgresql/data
-          name: pgdata
-        readinessProbe:
-          exec:
-            command:
-              - pg_isready
-              - "-U"
-              - "$(POSTGRES_USER)"
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 6
+        - name: postgres
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: pgdata
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - "-U"
+                - "$(POSTGRES_USER)"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
       volumes:
-      - name: pgdata
-        persistentVolumeClaim:
-          claimName: pgdata-pvc
+        - name: pgdata
+          persistentVolumeClaim:
+            claimName: pgdata-pvc
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: pgdata-pvc
-  namespace: prod
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
+# Deployment da aplicação Flask
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -108,76 +112,77 @@ spec:
         app: web
     spec:
       containers:
-      - name: web
-        image: marcoantoniolobo82/blogpython:v1
-        ports:
-        - containerPort: 8080
-        env:
-        - name: APP_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: APP_PORT
-        - name: APP_ENV
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: APP_ENV
-        - name: POSTGRES_DB
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: POSTGRES_DB
-        - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: POSTGRES_USER
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: POSTGRES_PASSWORD
-        - name: DB_HOST
-          value: "db"
-        - name: DB_PORT
-          value: "5432"
-        - name: DB_NAME
-          value: "blogdb"
-        - name: DB_USER
-          value: "malobo"
-        - name: DB_PASSWORD
-          value: "233234"
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "300m"
-          limits:
-            memory: "1Gi"
-            cpu: "600m"
-        startupProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          failureThreshold: 10
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          failureThreshold: 5
-          timeoutSeconds: 5
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 15
-          failureThreshold: 6
-          timeoutSeconds: 5
+        - name: web
+          image: marcoantoniolobo82/blogpython:v1
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PORT
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_ENV
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
+            - name: DB_HOST
+              value: "db"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "blogdb"
+            - name: DB_USER
+              value: "malobo"
+            - name: DB_PASSWORD
+              value: "233234"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "300m"
+            limits:
+              memory: "1Gi"
+              cpu: "600m"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            failureThreshold: 6
+            timeoutSeconds: 5
 ---
+# Service do banco
 apiVersion: v1
 kind: Service
 metadata:
@@ -187,9 +192,10 @@ spec:
   selector:
     app: db
   ports:
-  - port: 5432
-    targetPort: 5432
+    - port: 5432
+      targetPort: 5432
 ---
+# Service da aplicação (NodePort)
 apiVersion: v1
 kind: Service
 metadata:
@@ -200,6 +206,6 @@ spec:
     app: web
   type: NodePort
   ports:
-  - port: 80
-    targetPort: 8080
-    nodePort: 30000
+    - port: 80
+      targetPort: 8080
+      nodePort: 30000
